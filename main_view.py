@@ -12,7 +12,7 @@ from color_dialog import ColorDialog
 class MainView:
     def __init__(self):
         self.builder = Gtk.Builder()
-        self.builder.add_from_file('gui_pdi.glade')
+        self.builder.add_from_file('main_gui.glade')
         self.builder.connect_signals(self)
 
         self.box = self.builder.get_object('inner_box')
@@ -33,6 +33,10 @@ class MainView:
         file_path = self.file_dialog.choose_file()
         if(file_path):
             self.set_main_image(self.image_handler.read_image(file_path))
+
+    def on_salt_and_pepper(self, widget):
+        main_figure = self.image_handler.salt_and_pepper()
+        self.set_main_image(main_figure)
 
     def on_thresholding(self, widget):
         self.threshold_dialog = ThresholdDialog(self.window)

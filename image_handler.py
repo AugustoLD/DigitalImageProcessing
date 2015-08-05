@@ -24,6 +24,22 @@ class ImageHandler:
         ax.set_yticks([])
         return figure
 
+    def salt_and_pepper(self):
+        s_vs_p = 0.5
+        amount = 0.004
+
+        # Salt mode
+        num_salt = numpy.ceil(amount * self.img.size * s_vs_p)
+        coords = [numpy.random.randint(0, i - 1, int(num_salt)) for i in self.img.shape]
+        self.img[coords] = 1
+
+        # Pepper mode
+        num_pepper = numpy.ceil(amount * self.img.size * (1. - s_vs_p))
+        coords = [numpy.random.randint(0, i - 1, int(num_pepper)) for i in self.img.shape]
+        self.img[coords] = 0
+
+        return self.set_figure(self.img, 'Original')
+
     def threshold(self, threshold_value, is_adaptive):
         gray_image = cv2.cvtColor(self.img, cv2.COLOR_RGB2GRAY)
         if is_adaptive:
@@ -68,7 +84,7 @@ class ImageHandler:
 
     def color_extract(self, color):
         r, g, b = color
-        t = 50
+        t = 100
         lower = numpy.array([r-t, g-t, b-t])
         upper = numpy.array([r+t, g+t, b+t])
 
