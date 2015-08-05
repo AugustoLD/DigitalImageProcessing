@@ -3,8 +3,7 @@
 from gi.repository import Gtk
 from matplotlib.figure import Figure
 import cv2
-import numpy as np
-import matplotlib.image as mpimg
+import numpy
 
 class ImageHandler:
     def __init__(self):
@@ -25,10 +24,55 @@ class ImageHandler:
         ax.set_yticks([])
         return figure
 
-    def threshold(self, threshold_value, is_automatic):
+    def threshold(self, threshold_value, is_adaptive):
         gray_image = cv2.cvtColor(self.img, cv2.COLOR_RGB2GRAY)
-        if is_automatic:
-            thresh = cv2.adaptiveThreshold(gray_image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+        if is_adaptive:
+            resulted_image = cv2.adaptiveThreshold(gray_image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+            output_value = 'Adaptive'
         else:
-            ret, thresh = cv2.threshold(gray_image,threshold_value,255,cv2.THRESH_BINARY)
-        return self.set_figure(gray_image, 'Gray Scale'), self.set_figure(thresh, 'Thresholding({})'.format(threshold_value))
+            ret, resulted_image = cv2.threshold(gray_image,threshold_value,255,cv2.THRESH_BINARY)
+            output_value = threshold_value
+        return self.set_figure(gray_image, 'Gray Scale'), self.set_figure(resulted_image, 'Thresholding({})'.format(output_value))
+
+    def average(self, mask_size):
+        resulted_image = cv2.blur(self.img, (mask_size, mask_size))
+        return self.set_figure(resulted_image, 'Average({})'.format(mask_size))
+
+    def median(self, mask_size):
+        if(mask_size % 2 == 0):
+            mask_size += 1
+        resulted_image = cv2.medianBlur(self.img, mask_size)
+        return self.set_figure(resulted_image, 'Median({})'.format(mask_size))
+
+    def high_pass(self):
+        kernel = [[-1,-1,-1],[-1,8,-1],[-1,-1,-1]]
+        kernel = numpy.asanyarray(kernel, numpy.float32)
+
+        resulted_image = cv2.filter2D(self.img, -1, kernel)
+        blur = cv2.blur(self.img, (5, 5))
+        resulted_image2 = cv2.subtract(self.img, blur)
+        return self.set_figure(resulted_image, 'Basic High Pass'), self.set_figure(resulted_image2, 'Basic High Pass')
+
+    def sobel(self):
+        gray_image = cv2.cvtColor(self.img, cv2.COLOR_RGB2GRAY)
+        ddepth = cv2.CV_64F
+
+        sobel_x = cv2.Sobel(gray_image, ddepth, 1, 0)
+        sobel_y = cv2.Sobel(gray_image, ddepth, 0, 1)
+
+        sobel_x = cv2.convertScaleAbs(sobel_x)
+        sobel_y = cv2.convertScaleAbs(sobel_y)
+
+        resulted_image = cv2.addWeighted(sobel_x, 0.5, sobel_y, 0.5, 0)
+        return self.set_figure(resulted_image, 'Sobel')
+
+    def color_extract(self, color):
+        r, g, b = color
+        t = 50
+        lower = numpy.array([r-t, g-t, b-t])
+        upper = numpy.array([r+t, g+t, b+t])
+
+        mask = cv2.inRange(self.img, lower, upper)
+        resulted_image = cv2.bitwise_and(self.img, self.img, mask=mask)
+
+        return self.set_figure(resulted_image, 'Color Extraction')

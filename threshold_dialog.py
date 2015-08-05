@@ -6,7 +6,7 @@ class ThresholdDialog:
     def __init__(self, parent_window):
         self.parent_window = parent_window
         self.threshold_value = None
-        self.is_automatic = None
+        self.is_adaptive = None
 
     def open_dialog(self):
         self.builder = Gtk.Builder()
@@ -17,12 +17,12 @@ class ThresholdDialog:
         self.threshold_scale = self.builder.get_object('scale')
         self.automatic_ceck_button = self.builder.get_object('checkbutton')
         self.dialog.run()
-        return self.threshold_value, self.is_automatic
+        return self.threshold_value, self.is_adaptive
 
     def on_cancel_button(self, widget):
         self.dialog.destroy()
 
     def on_ok_button(self, widget):
         self.threshold_value = int(self.threshold_scale.get_value())
-        self.is_automatic = self.automatic_ceck_button.get_active()
+        self.is_adaptive = self.automatic_ceck_button.get_active()
         self.dialog.destroy()
