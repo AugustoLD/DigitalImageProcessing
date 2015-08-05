@@ -21,8 +21,10 @@ class MainView:
 
         self.image_handler = ImageHandler()
 
-        self.main_canvas = FigureCanvas(self.image_handler.read_image('lena.jpg'))
+        self.main_canvas = FigureCanvas(self.image_handler.read_main_image('lena.jpg'))
         self.box.pack_start(self.main_canvas, True, True, 0)
+        self.filtered_canvas = None
+        self.secondary_canvas = None
         self.window.show_all()
 
     def on_delete_window(self, *args):
@@ -32,21 +34,25 @@ class MainView:
         self.file_dialog = FileDialog(self.window)
         file_path = self.file_dialog.choose_file()
         if(file_path):
-            self.set_main_image(self.image_handler.read_image(file_path))
+            self.set_main_image(self.image_handler.read_main_image(file_path))
 
     def on_salt_and_pepper(self, widget):
         main_figure = self.image_handler.salt_and_pepper()
         self.set_main_image(main_figure)
 
+    def on_gray_scale(self, widget):
+        main_figure = self.image_handler.convert_main_to_gray()
+        self.set_main_image(main_figure)
+
+    def on_replace(self, widget):
+        self.set_main_image(self.image_handler.replace_img())
+
     def on_thresholding(self, widget):
         self.threshold_dialog = ThresholdDialog(self.window)
         threshold_value, is_adaptive = self.threshold_dialog.open_dialog()
         if(threshold_value != None):
-            gray_figure, resulted_figure = self.image_handler.threshold(threshold_value, is_adaptive)
+            resulted_figure = self.image_handler.threshold(threshold_value, is_adaptive)
             self.set_resulted_image(resulted_figure)
-            self.middle_canvas = FigureCanvas(gray_figure)
-            self.box.pack_start(self.middle_canvas, True, True, 0)
-            self.window.show_all()
 
     def on_average(self, widget):
         self.mask_dialog = MaskDialog(self.window)
@@ -63,14 +69,39 @@ class MainView:
             self.set_resulted_image(resulted_figure)
 
     def on_high_pass(self, widget):
-        resulted_figure, resulted_image2 = self.image_handler.high_pass()
+        resulted_figure = self.image_handler.high_pass()
         self.set_resulted_image(resulted_figure)
-        self.middle_canvas = FigureCanvas(resulted_image2)
-        self.box.pack_start(self.middle_canvas, True, True, 0)
-        self.window.show_all()
+
+    def on_horizontal(self, widget):
+        resulted_figure = self.image_handler.horizontal()
+        self.set_resulted_image(resulted_figure)
+
+    def on_vertical(self, widget):
+        resulted_figure = self.image_handler.vertical()
+        self.set_resulted_image(resulted_figure)
+
+    def on_plus_45(self, widget):
+        resulted_figure = self.image_handler.plus_45()
+        self.set_resulted_image(resulted_figure)
+
+    def on_minus_45(self, widget):
+        resulted_figure = self.image_handler.minus_45()
+        self.set_resulted_image(resulted_figure)
 
     def on_sobel(self, widget):
         resulted_figure = self.image_handler.sobel()
+        self.set_resulted_image(resulted_figure)
+
+    def on_prewitt(self, widget):
+        resulted_figure = self.image_handler.prewitt()
+        self.set_resulted_image(resulted_figure)
+
+    def on_roberts(self, widget):
+        resulted_figure = self.image_handler.roberts()
+        self.set_resulted_image(resulted_figure)
+
+    def on_hough_line(self, widget):
+        resulted_figure = self.image_handler.hough_line()
         self.set_resulted_image(resulted_figure)
 
     def on_color_extract(self, widget):
@@ -86,19 +117,53 @@ class MainView:
         self.box.pack_start(self.main_canvas, True, True, 0)
         self.window.show_all()
 
-    def set_resulted_image(self, figure):
-        self.remove_current_images()
+    def set_resulted_image(self, figure, preserve_middle=False):
+        self.remove_current_images(preserve_middle=preserve_middle)
         self.filtered_canvas = FigureCanvas(figure)
         self.box.pack_end(self.filtered_canvas, True, True, 0)
         self.window.show_all()
 
-    def remove_current_images(self, all=False):
-        if len(self.box.get_children()) > 2:
-            self.box.remove(self.middle_canvas)
-        if len(self.box.get_children()) > 1:
+    def set_secondary_image(self, figure):
+        self.remove_current_images()
+        self.secondary_canvas = FigureCanvas(figure)
+        self.box.pack_start(self.secondary_canvas, True, True, 0)
+        self.window.show_all()
+
+    def remove_current_images(self, all=False, preserve_middle=False):
+        if not preserve_middle and self.secondary_canvas in self.box.get_children():
+            self.box.remove(self.secondary_canvas)
+        if self.filtered_canvas in self.box.get_children():
             self.box.remove(self.filtered_canvas)
         if all:
             self.box.remove(self.main_canvas)
+
+    def on_union(self, widget):
+        file_dialog = FileDialog(self.window)
+        file_path = file_dialog.choose_file()
+        if(file_path):
+            self.set_secondary_image(self.image_handler.read_secondary_image(file_path))
+            resulted_figure = self.image_handler.union()
+            self.set_resulted_image(resulted_figure, preserve_middle=True)
+
+    def on_intersection(self, widget):
+        file_dialog = FileDialog(self.window)
+        file_path = file_dialog.choose_file()
+        if(file_path):
+            self.set_secondary_image(self.image_handler.read_secondary_image(file_path))
+            resulted_figure = self.image_handler.intersection()
+            self.set_resulted_image(resulted_figure, preserve_middle=True)
+
+    def on_difference(self, widget):
+        file_dialog = FileDialog(self.window)
+        file_path = file_dialog.choose_file()
+        if(file_path):
+            self.set_secondary_image(self.image_handler.read_secondary_image(file_path))
+            resulted_figure = self.image_handler.difference()
+            self.set_resulted_image(resulted_figure, preserve_middle=True)
+
+    def on_complement(self, widget):
+        resulted_figure = self.image_handler.complement()
+        self.set_resulted_image(resulted_figure)
 
 if __name__ == '__main__':
     mv = MainView()
