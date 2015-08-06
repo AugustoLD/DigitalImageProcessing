@@ -132,15 +132,28 @@ class MainView:
         self.set_resulted_image(resulted_figure)
 
     def on_hough_line(self, widget):
-        resulted_figure = self.image_handler.hough_line()
-        self.set_resulted_image(resulted_figure)
+        self.threshold_dialog = ThresholdDialog(self.window)
+        threshold_value, is_adaptive = self.threshold_dialog.open_dialog(True)
+        if(threshold_value != None):
+            resulted_figure = self.image_handler.hough_line(threshold_value)
+            self.set_resulted_image(resulted_figure)
+
+    def on_seam_carving(self, widget):
+        self.threshold_dialog = ThresholdDialog(self.window)
+        threshold_value, is_adaptive = self.threshold_dialog.open_dialog(True)
+        if(threshold_value != None):
+            resulted_figure = self.image_handler.apply_seam_carving(threshold_value)
+            self.set_resulted_image(resulted_figure)
 
     def on_color_extract(self, widget):
         self.colorDialog = ColorDialog(self.window)
         color = self.colorDialog.select()
         if color != None:
-            resulted_figure = self.image_handler.color_extract(color)
-            self.set_resulted_image(resulted_figure)
+            self.threshold_dialog = ThresholdDialog(self.window)
+            threshold_value, is_adaptive = self.threshold_dialog.open_dialog(True)
+            if(threshold_value != None):
+                resulted_figure = self.image_handler.color_extract(color, threshold_value)
+                self.set_resulted_image(resulted_figure)
 
     def on_operand_file(self, widget):
         file_dialog = FileDialog(self.window)

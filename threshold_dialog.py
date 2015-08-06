@@ -8,12 +8,15 @@ class ThresholdDialog:
         self.threshold_value = None
         self.is_adaptive = None
 
-    def open_dialog(self):
+    def open_dialog(self, no_check_button=False):
         self.builder = Gtk.Builder()
         self.builder.add_from_file('threshold_gui.glade')
         self.builder.connect_signals(self)
         self.dialog = self.builder.get_object('dialog')
         self.dialog.set_transient_for(self.parent_window)
+        if no_check_button:
+            check_button = self.builder.get_object('checkbutton')
+            check_button.set_visible(False)
         self.threshold_scale = self.builder.get_object('scale')
         self.automatic_ceck_button = self.builder.get_object('checkbutton')
         self.dialog.run()

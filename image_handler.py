@@ -2,6 +2,7 @@
 
 from gi.repository import Gtk
 from matplotlib.figure import Figure
+from seam_carving import SeamCarving
 import cv2
 import numpy
 import copy
@@ -12,13 +13,13 @@ class ImageHandler:
         self.resulted_image = None
         self.secondary_image = None
         self.original_image = None
+        self.seam_carving = SeamCarving()
 
 #################################################################
 #                         Utilities                             #
     def read_image(self, img_path):
+        self.img_path = img_path
         img = cv2.imread(img_path)
-        b, g, r = cv2.split(img)
-        img = cv2.merge([r,g,b])
         return img
 
     def read_main_image(self, img_path):
@@ -32,9 +33,13 @@ class ImageHandler:
         return self.set_figure(self.secondary_image, 'Operand')
 
     def set_figure(self, img, title=None):
-        figure = Figure(figsize=(10,8), dpi=100)
+        figure = Figure()
         ax = figure.add_subplot(111)
-        ax.imshow(img, 'gray')
+        try:
+            ax.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+        except:
+            ax.imshow(img, 'gray')
+        ax.autoscale(False)
         ax.set_title(title)
         ax.set_xticks([])
         ax.set_yticks([])
@@ -73,7 +78,7 @@ class ImageHandler:
 
     def gray_scale(self, img):
         try:
-            gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         except:
             print('Image is already in gray scale')
             return img
@@ -89,11 +94,10 @@ class ImageHandler:
             output_value = threshold_value
         return self.set_figure(self.resulted_image, 'Thresholding({})'.format(output_value))
 
-    def color_extract(self, color):
+    def color_extract(self, color, t):
         r, g, b = color
-        t = 100
-        lower = numpy.array([r-t, g-t, b-t])
-        upper = numpy.array([r+t, g+t, b+t])
+        lower = numpy.array([b-t, g-t, r-t])
+        upper = numpy.array([b+t, g+t, r+t])
 
         mask = cv2.inRange(self.current_image, lower, upper)
         self.resulted_image = cv2.bitwise_and(self.current_image, self.current_image, mask=mask)
@@ -190,13 +194,13 @@ class ImageHandler:
 
 #################################################################
 #                           Detection                           #
-    def hough_line(self):
+    def hough_line(self, threshold):
         gray_image = self.gray_scale(self.current_image)
         self.resulted_image = copy.copy(self.current_image)
 
         edges = cv2.Canny(gray_image,50,150,apertureSize = 3)
 
-        lines = cv2.HoughLines(edges, 1, numpy.pi/180, 100)
+        lines = cv2.HoughLines(edges, 1, numpy.pi/180, threshold)
 
         for rho, theta in lines[0]:
             a = numpy.cos(theta)
@@ -207,7 +211,7 @@ class ImageHandler:
             y1 = int(y0 + 1000 * (a))
             x2 = int(x0 - 1000 * (-b))
             y2 = int(y0 - 1000 * (a))
-            cv2.line(self.resulted_image,(x1,y1),(x2,y2),(255,0,0),2)
+            cv2.line(self.resulted_image,(x1,y1),(x2,y2),(0,0,255),1)
 
         return self.set_figure(self.resulted_image, "Hough Line")
 #################################################################
@@ -237,3 +241,9 @@ class ImageHandler:
         return self.set_figure(self.resulted_image, 'Subtraction')
 
 #################################################################
+
+    def apply_seam_carving(self, amount):
+        print("Wait...")
+        self.resulted_image = self.seam_carving.resize(self.current_image, amount, 0, 0)
+        self.resulted_image = cv2.convertScaleAbs(self.resulted_image)
+        return self.set_figure(self.resulted_image, 'Seam Carving')

@@ -56,6 +56,10 @@
     <property name="can_focus">False</property>
     <property name="stock">gtk-open</property>
   </object>
+  <object class="GtkImage" id="image21">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+  </object>
   <object class="GtkImage" id="image3">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -428,22 +432,22 @@
               </object>
             </child>
             <child>
-              <object class="GtkMenuItem" id="menuitem7">
+              <object class="GtkMenuItem" id="menuitem8">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Ajuda</property>
-                <property name="use_underline">True</property>
+                <property name="label" translatable="yes">Redimensionar</property>
                 <child type="submenu">
-                  <object class="GtkMenu" id="menu3">
+                  <object class="GtkMenu" id="menu_editar4">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkImageMenuItem" id="imagemenuitem10">
-                        <property name="label">gtk-about</property>
+                      <object class="GtkImageMenuItem" id="seam_carving">
+                        <property name="label">Seam Carving</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
+                        <property name="image">image21</property>
+                        <property name="use_stock">False</property>
+                        <signal name="activate" handler="on_seam_carving" swapped="no"/>
                       </object>
                     </child>
                   </object>
