@@ -27,6 +27,34 @@ class MainView:
         self.secondary_canvas = None
         self.window.show_all()
 
+    def set_main_image(self, figure):
+        self.remove_current_images(all=True)
+        self.main_canvas = FigureCanvas(figure)
+        self.box.pack_start(self.main_canvas, True, True, 0)
+        self.window.show_all()
+
+    def set_resulted_image(self, figure, preserve_middle=False):
+        self.remove_current_images(preserve_middle=preserve_middle)
+        self.filtered_canvas = FigureCanvas(figure)
+        self.box.pack_end(self.filtered_canvas, True, True, 0)
+        self.window.show_all()
+
+    def set_secondary_image(self, figure):
+        self.remove_current_images()
+        self.secondary_canvas = FigureCanvas(figure)
+        self.box.pack_start(self.secondary_canvas, True, True, 0)
+        self.window.show_all()
+
+    def remove_current_images(self, all=False, preserve_middle=False):
+        if not preserve_middle and self.secondary_canvas in self.box.get_children():
+            self.box.remove(self.secondary_canvas)
+        if self.filtered_canvas in self.box.get_children():
+            self.box.remove(self.filtered_canvas)
+        if all:
+            self.box.remove(self.main_canvas)
+
+#################################################################
+#                   Signal Handlers                          #
     def on_delete_window(self, *args):
         Gtk.main_quit(*args)
 
@@ -37,15 +65,18 @@ class MainView:
             self.set_main_image(self.image_handler.read_main_image(file_path))
 
     def on_salt_and_pepper(self, widget):
-        main_figure = self.image_handler.salt_and_pepper()
-        self.set_main_image(main_figure)
+        resulted_figure = self.image_handler.salt_and_pepper()
+        self.set_resulted_image(resulted_figure)
 
     def on_gray_scale(self, widget):
-        main_figure = self.image_handler.convert_main_to_gray()
-        self.set_main_image(main_figure)
+        resulted_figure = self.image_handler.convert_current_to_gray()
+        self.set_resulted_image(resulted_figure)
 
     def on_replace(self, widget):
-        self.set_main_image(self.image_handler.replace_img())
+        self.set_main_image(self.image_handler.replace_current_img())
+
+    def on_recover(self, widget):
+        self.set_main_image(self.image_handler.recover_original_img())
 
     def on_thresholding(self, widget):
         self.threshold_dialog = ThresholdDialog(self.window)
@@ -111,59 +142,28 @@ class MainView:
             resulted_figure = self.image_handler.color_extract(color)
             self.set_resulted_image(resulted_figure)
 
-    def set_main_image(self, figure):
-        self.remove_current_images(all=True)
-        self.main_canvas = FigureCanvas(figure)
-        self.box.pack_start(self.main_canvas, True, True, 0)
-        self.window.show_all()
-
-    def set_resulted_image(self, figure, preserve_middle=False):
-        self.remove_current_images(preserve_middle=preserve_middle)
-        self.filtered_canvas = FigureCanvas(figure)
-        self.box.pack_end(self.filtered_canvas, True, True, 0)
-        self.window.show_all()
-
-    def set_secondary_image(self, figure):
-        self.remove_current_images()
-        self.secondary_canvas = FigureCanvas(figure)
-        self.box.pack_start(self.secondary_canvas, True, True, 0)
-        self.window.show_all()
-
-    def remove_current_images(self, all=False, preserve_middle=False):
-        if not preserve_middle and self.secondary_canvas in self.box.get_children():
-            self.box.remove(self.secondary_canvas)
-        if self.filtered_canvas in self.box.get_children():
-            self.box.remove(self.filtered_canvas)
-        if all:
-            self.box.remove(self.main_canvas)
+    def on_operand_file(self, widget):
+        file_dialog = FileDialog(self.window)
+        file_path = file_dialog.choose_file()
+        if(file_path):
+            self.set_secondary_image(self.image_handler.read_secondary_image(file_path))
 
     def on_union(self, widget):
-        file_dialog = FileDialog(self.window)
-        file_path = file_dialog.choose_file()
-        if(file_path):
-            self.set_secondary_image(self.image_handler.read_secondary_image(file_path))
-            resulted_figure = self.image_handler.union()
-            self.set_resulted_image(resulted_figure, preserve_middle=True)
+        resulted_figure = self.image_handler.union()
+        self.set_resulted_image(resulted_figure, preserve_middle=True)
 
     def on_intersection(self, widget):
-        file_dialog = FileDialog(self.window)
-        file_path = file_dialog.choose_file()
-        if(file_path):
-            self.set_secondary_image(self.image_handler.read_secondary_image(file_path))
-            resulted_figure = self.image_handler.intersection()
-            self.set_resulted_image(resulted_figure, preserve_middle=True)
+        resulted_figure = self.image_handler.intersection()
+        self.set_resulted_image(resulted_figure, preserve_middle=True)
 
-    def on_difference(self, widget):
-        file_dialog = FileDialog(self.window)
-        file_path = file_dialog.choose_file()
-        if(file_path):
-            self.set_secondary_image(self.image_handler.read_secondary_image(file_path))
-            resulted_figure = self.image_handler.difference()
-            self.set_resulted_image(resulted_figure, preserve_middle=True)
+    def on_subtraction(self, widget):
+        resulted_figure = self.image_handler.subtraction()
+        self.set_resulted_image(resulted_figure, preserve_middle=True)
 
     def on_complement(self, widget):
         resulted_figure = self.image_handler.complement()
         self.set_resulted_image(resulted_figure)
+#################################################################
 
 if __name__ == '__main__':
     mv = MainView()
