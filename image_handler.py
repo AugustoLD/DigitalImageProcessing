@@ -45,6 +45,9 @@ class ImageHandler:
         ax.set_yticks([])
         return figure
 
+    def get_current_img_width(self):
+        return list(self.current_image.shape)[1]
+
     def replace_current_img(self):
         self.current_image = self.resulted_image
         return self.set_figure(self.current_image, 'Current')
@@ -55,18 +58,19 @@ class ImageHandler:
         return self.set_figure(self.current_image, 'Original')
 
     def salt_and_pepper(self):
+        image_dimension = list(self.current_image.shape)[:2]
         s_vs_p = 0.5
-        amount = 0.020
+        amount = 0.004
         noised_image = copy.copy(self.current_image)
 
         # Salt mode
         num_salt = numpy.ceil(amount * self.current_image.size * s_vs_p)
-        coords = [numpy.random.randint(0, i - 1, int(num_salt)) for i in self.current_image.shape]
-        noised_image[coords] = 1
+        coords = [numpy.random.randint(0, i - 1, int(num_salt)) for i in image_dimension]
+        noised_image[coords] = 255
 
         # Pepper mode
         num_pepper = numpy.ceil(amount * self.current_image.size * (1. - s_vs_p))
-        coords = [numpy.random.randint(0, i - 1, int(num_pepper)) for i in self.current_image.shape]
+        coords = [numpy.random.randint(0, i - 1, int(num_pepper)) for i in image_dimension]
         noised_image[coords] = 0
 
         self.resulted_image = noised_image
@@ -105,9 +109,10 @@ class ImageHandler:
         return self.set_figure(self.resulted_image, 'Color Extraction')
 
     def complement(self):
-        operand1 = self.gray_scale(self.current_image)
+        # operand1 = self.gray_scale(self.current_image)
 
-        self.resulted_image = cv2.bitwise_not(operand1)
+
+        self.resulted_image = cv2.bitwise_not(self.current_image)
         return self.set_figure(self.resulted_image, 'Complement')
 
 #################################################################

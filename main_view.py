@@ -8,6 +8,7 @@ from file_dialog import FileDialog
 from threshold_dialog import ThresholdDialog
 from mask_dialog import MaskDialog
 from color_dialog import ColorDialog
+from config_dialog import ConfigDialog
 
 class MainView:
     def __init__(self):
@@ -54,7 +55,7 @@ class MainView:
             self.box.remove(self.main_canvas)
 
 #################################################################
-#                   Signal Handlers                          #
+#                   Signal Handlers                             #
     def on_delete_window(self, *args):
         Gtk.main_quit(*args)
 
@@ -132,27 +133,27 @@ class MainView:
         self.set_resulted_image(resulted_figure)
 
     def on_hough_line(self, widget):
-        self.threshold_dialog = ThresholdDialog(self.window)
-        threshold_value, is_adaptive = self.threshold_dialog.open_dialog(True)
-        if(threshold_value != None):
-            resulted_figure = self.image_handler.hough_line(threshold_value)
+        self.config_dialog = ConfigDialog(self.window)
+        config_value = self.config_dialog.open_dialog('Nivel de Aceitacao', 255)
+        if(config_value != None):
+            resulted_figure = self.image_handler.hough_line(config_value)
             self.set_resulted_image(resulted_figure)
 
     def on_seam_carving(self, widget):
-        self.threshold_dialog = ThresholdDialog(self.window)
-        threshold_value, is_adaptive = self.threshold_dialog.open_dialog(True)
-        if(threshold_value != None):
-            resulted_figure = self.image_handler.apply_seam_carving(threshold_value)
+        self.config_dialog = ConfigDialog(self.window)
+        amount_value = self.config_dialog.open_dialog('Linhas a Retirar', self.image_handler.get_current_img_width())
+        if(amount_value != None):
+            resulted_figure = self.image_handler.apply_seam_carving(amount_value)
             self.set_resulted_image(resulted_figure)
 
     def on_color_extract(self, widget):
         self.colorDialog = ColorDialog(self.window)
         color = self.colorDialog.select()
         if color != None:
-            self.threshold_dialog = ThresholdDialog(self.window)
-            threshold_value, is_adaptive = self.threshold_dialog.open_dialog(True)
-            if(threshold_value != None):
-                resulted_figure = self.image_handler.color_extract(color, threshold_value)
+            self.config_dialog = ConfigDialog(self.window)
+            config_value = self.config_dialog.open_dialog('Taxa de Tolerancia', 255)
+            if(config_value != None):
+                resulted_figure = self.image_handler.color_extract(color, config_value)
                 self.set_resulted_image(resulted_figure)
 
     def on_operand_file(self, widget):
