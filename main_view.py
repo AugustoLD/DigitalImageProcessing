@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from gi import require_version
+require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_gtk3cairo import FigureCanvasGTK3Cairo as FigureCanvas

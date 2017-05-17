@@ -14,8 +14,8 @@ class SeamCarving(object):
 
         cost = np.zeros((row_num, col_num)).astype(int)
 
-        for i in xrange(0, row_num):
-            for j in xrange(0, col_num):
+        for i in range(0, row_num):
+            for j in range(0, col_num):
                 if i == 0:
                     cost[i][j] = m_energy[i][j]
                 else:
@@ -75,11 +75,11 @@ class SeamCarving(object):
         m_rgb = np.transpose(img) if orient else img
         row_num, col_num, rgb = m_rgb.shape
         m_res = m_rgb.tolist()
-        for i in xrange(0, amount):
+        for i in range(0, amount):
             sobel = self.sobel_rgb(np.array(m_res), orient)
             seam = self.find_a_seam(sobel)
             if mode:
-                for row in xrange(0, row_num):
+                for row in range(0, row_num):
                     if row > 0 and row < row_num - 1:
                         interpolation_pixel = [(m_res[row][seam[row] - 1][0] + m_res[row][seam[row] + 1][0]) / 2, (m_res[row][seam[row] - 1][
                             1] + m_res[row][seam[row] + 1][1]) / 2, (m_res[row][seam[row] - 1][2] + m_res[row][seam[row] + 1][2]) / 2]
@@ -92,7 +92,7 @@ class SeamCarving(object):
 
                     m_res[row].insert(seam[row], interpolation_pixel)
             else:
-                for row in xrange(0, row_num):
+                for row in range(0, row_num):
                     m_res[row].pop(seam[row])
 
         m_res = np.array(m_res)

@@ -36,9 +36,9 @@ class ImageHandler:
         figure = Figure()
         ax = figure.add_subplot(111)
         try:
-            ax.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+            ax.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), origin='lower')
         except:
-            ax.imshow(img, 'gray')
+            ax.imshow(img, 'gray', origin='lower')
         ax.autoscale(False)
         ax.set_title(title)
         ax.set_xticks([])
